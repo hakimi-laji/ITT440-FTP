@@ -24,16 +24,17 @@ TROUBLESHOOT
 
 For now, *ftp.py* functions are severely lacking. What works are:
 - retrieve single file
-- send single file
+- send single file    - BREAKS
 - list files
 
 What I want to add:
 - retrieve multiple files
 - send multiple files
-- change directory
-- remove file(s)
-- rename file
+- change directory    - DONE
+- remove file(s)      - DONE
+- rename file         - DONE
 - create/remove folder
+- security stuffs
 - etc...
 
 I will try my best (；⌣̀_⌣́)	
