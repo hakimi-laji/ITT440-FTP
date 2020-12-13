@@ -37,4 +37,4 @@ What I want to add:
 - security stuffs
 - etc...
 
-I will try my best (；⌣̀_⌣́)	
+I will try my best
