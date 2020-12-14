@@ -12,5 +12,5 @@ ftp.login('ftp',password)
 print ('Files in the directory:\n------------------------------------------------------------')
 print ('Permission    File No.                Size Date   Time  Name')
 
-files = ftp.dir()
+ftp.dir()
 
