@@ -1,51 +1,72 @@
 from ftplib import FTP
 import os
+import getpass
 
 #get domain name or server ip:
-ftpdomain = input ("FTP domain (default: 192.168.1.10)\n>>> ")
 ftp = FTP(ftpdomain)
 
 #authenticate user
 authUser = input ("Username: ")
-authPass = input ("Password: ")
+password = getpass.getpass()
+authPass = password
 ftp.login(user = authUser, passwd = authPass)
 
 #save location - this is where the files downloaded will be saved
-savePath = '/home/nox/ftp'
-os.chdir(savePath)
+#savePath = '/home/nox/ftp'
+#os.chdir(savePath)
+
+#save location is set to current working directory - the same directory where this .py is located
+os.getcwd()
 
 #GET command
 def ftpGet():
-    filename = input ("\nFile to retrieve: ")
-    localfile = open(filename, 'wb')                            #file to retrieve
-    ftp.retrbinary('RETR ' + filename, localfile.write, 1024)   #retrieve the file
-    print (filename + " is retrieved successfully")
-    localfile.close()
+    filename = input ("File to retrieve: ")
+    try:
+        localfile = open(filename, 'wb')                            #file to retrieve
+        ftp.retrbinary('RETR ' + filename, localfile.write, 1024)   #retrieve the file
+        print (filename + " is retrieved successfully.")
+        localfile.close()
+    except:
+        print ("File does not exist on the server. Retrieval unsuccessful.")
+        os.remove(filename)
     
 #PUT command
 def ftpPut():
-    filename = input ("\nFile to send: ")
-    localfile = open(filename, 'rb')                  # file to send
-    ftp.storbinary('STOR ' + filename, localfile)     # send the file
-    print (filename + " is uploaded successfully")
-    localfile.close()
+    filename = input ("File to send: ")
+    try:
+        localfile = open(filename, 'rb')                            # file to send
+        ftp.storbinary('STOR ' + filename, localfile)               # send the file
+        print (filename + " is uploaded successfully.")
+        localfile.close()
+    except:
+        print ("File does not exist on the current directory. Upload unsuccessful.")
     
 #DEL command
 def ftpDel():
-    filename = input ("File to delete: ")           #file to delete
-    delConfirm = input ("Are you sure [y/n]: ")     #asking confirmation
-    if delConfirm == 'Y' or delConfirm == 'y':
-        ftp.delete(filename)
-        print (filename + " is deleted successfully")
+    filename = input ("File to delete: ")                           #select file to delete
+    try:
+        ftp.size(filename)                                          #check if file exists
+    except:
+        print ("File does not exist on the server.")
     else:
-        print (filename + " is not deleted")
+        delConfirm = input ("Are you sure [Y/N]: ")                 #asking confirmation
+        if delConfirm == 'Y' or delConfirm == 'y':
+            ftp.delete(filename)
+            print (filename + " is deleted successfully.")
+        else:
+            print (filename + " is not deleted.")
         
 #RENAME command
 def ftpRename():
-    filename = input ("File to rename: ")           #file to rename
-    newname = input ("New name: ")                  #new name file
-    ftp.rename(filename, newname)
-    print (filename + " is renamed to " + newname)
+    filename = input ("File to rename: ")                           #file to rename
+    try:
+        ftp.size(filename)                                          #check if file exists
+    except:
+        print ("File does not exist on the server")
+    else:
+        newname = input ("New name: ")                              #new name file
+        ftp.rename(filename, newname)
+        print (filename + " is renamed to " + newname)
 
 #LIST command
 def ftpList():
@@ -55,33 +76,63 @@ def ftpList():
 
 #MOVE between directories command
 def ftpDirMove():
-    pathname = input ("Move to directory: ")
-    ftp.cwd(pathname)
-    ftpList()
+    pathname = input ("Move to directory: ")                        #folder to enter
+    try:
+        ftp.cwd(pathname)                                           #check if folder exists
+    except:
+        print ("Directory does not exist.")
+    else:
+        ftpList()
 
 #RETURN to previous directoy command
 def ftpDirReturn():
-    ftp.cwd("../")
+    ftp.cwd("../")                                                  #return to previous directory
     ftpList()
     
 #RETURN to home command
 def ftpDirHome():
-    ftp.cwd("/")
+    ftp.cwd("/")                                                    #return to home directory
     ftpList()
     
+#CREATE new directory command
+def ftpDirNew():
+    dirname = input ("Create new folder: ")                         #folder name to create
+    ftp.mkd(dirname)
+
+#DELETE a directory
+def ftpDirDel():
+    dirname = input ("Delete a folder: ")
+    try:
+        ftp.cwd(dirname)                                            #check if file exists
+    except:
+        print ("Directory does not exist on the server.")
+    else:
+        delConfirm = input ("Are you sure [Y/N]: ")                 #asking confirmation
+        if delConfirm == 'Y' or delConfirm == 'y':
+            try:
+                ftp.cwd('../') 
+                ftp.rmd(dirname)
+                print (dirname + " is deleted successfully.")
+            except:
+                print("Directory is not empty.")
+        else:
+            print (dirname + " is not deleted.")
+
+# ^^^ FUNCTIONS ABOVE ^^^           vvv INTERFACE BELOW vvv #
 
 #Main menu user interface
-print ("\nWELCOME, " + authUser)    #greetings message
-ftpList()                           #display files on server
+print ("\nWELCOME, " + authUser)                                    #greetings message
+ftpList()                                                           #display files on server on initial login
+
 menu = ''
 while menu != 'X' or menu != 'x':
     print ("""
-  / FTP MENU \--------------------------------------------------< E[X]IT
- [1] List all files on the server    | [Q] Move to a different directory
- [2] Get a file from server          | [W] Return to previous directory
- [3] Put a file into server          | [E] Return to home directory
- [4] Delete a file                   | [A] Create a new folder
- [5] Rename a file                   | [S] Delete a folder
+  / FTP MENU \-------------------------------------< E[X]IT >
+ [1] List all files        [Q] Move to a different directory
+ [2] Get a file            [W] Return to previous directory
+ [3] Put a file            [E] Return to home directory
+ [4] Delete a file         [A] Create a new folder
+ [5] Rename a file         [S] Delete a folder
     """)
     menu = input ("-> ")
     if menu == '1':
@@ -100,11 +151,15 @@ while menu != 'X' or menu != 'x':
         ftpDirReturn()
     elif menu == 'E' or menu == 'e':
         ftpDirHome()
+    elif menu == 'A' or menu == 'a':
+        ftpDirNew()
+    elif menu == 'S' or menu == 's':
+        ftpDirDel()
     elif menu == 'X' or menu == 'x':
         print ("Goodbye!\n")
         break
     else:
-        print ("***PLEASE INPUT A KEY***")
+        print ("***PLEASE INPUT A VALID KEY***")
     
 ftp.quit()
 
