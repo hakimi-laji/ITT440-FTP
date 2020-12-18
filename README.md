@@ -6,6 +6,10 @@ WHY?
 1. I need to pass this subject.
 2. FTP on Linux is great but can be difficult to use sometimes. My code aimed to simplify everything.
 
+WATCH HOW IT WORKS:
+https://youtu.be/9prZGHpJuCc
+
+
 For this to work, you will need an FTP domain. You can use a Linux machine as a server by following the guide below
 
 https://www.techrepublic.com/article/how-to-quickly-setup-an-ftp-server-on-ubuntu-18-04/
